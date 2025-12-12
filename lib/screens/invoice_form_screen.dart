@@ -240,6 +240,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
+
                     Row(
                       children: [
                         Expanded(
@@ -255,7 +256,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: _PaymentTypeButton(
                             icon: Icons.credit_card,
@@ -265,6 +266,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                             onTap: () {
                               setState(() {
                                 _paymentType = PaymentType.cashea;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PaymentTypeButton(
+                            icon: Icons.smartphone,
+                            label: 'IVOO App',
+                            isSelected: _paymentType == PaymentType.ivoo,
+                            color: Colors.orange,
+                            onTap: () {
+                              setState(() {
+                                _paymentType = PaymentType.ivoo;
                               });
                             },
                           ),

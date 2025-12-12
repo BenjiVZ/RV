@@ -4,12 +4,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/app_provider.dart';
 import 'models/invoice.dart';
 import 'screens/registration_screen.dart';
-import 'screens/home_screen.dart';
 import 'screens/invoice_form_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/clients_screen.dart';
 import 'screens/access_request_screen.dart';
+import 'screens/tools_screen.dart';
+import 'screens/tools/cashea_calculator_screen.dart';
+import 'screens/tools/currency_converter_screen.dart';
+import 'screens/tools/discount_calculator_screen.dart';
+import 'widgets/main_scaffold.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,20 +45,91 @@ class MyApp extends StatelessWidget {
         title: 'VentaBox',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.light,
-          ),
+          // Modern Slate Theme
           useMaterial3: true,
           fontFamily: 'Roboto',
+          scaffoldBackgroundColor: const Color(0xFFF8FAFC), // Slate 50
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF0F172A), // Slate 900
+            primary: const Color(0xFF0F172A),
+            secondary: const Color(0xFF334155), // Slate 700
+            surface: Colors.white,
+            error: const Color(0xFFEF4444),
+          ),
+          
+          // AppBar Theme
+          appBarTheme: const AppBarTheme(
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Color(0xFF0F172A),
+            centerTitle: true,
+            titleTextStyle: TextStyle(
+              color: Color(0xFF0F172A),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+
+          // Card Theme
+          cardTheme: CardTheme(
+            elevation: 0,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Color(0xFFE2E8F0)), // Slate 200
+            ),
+            margin: EdgeInsets.zero,
+          ),
+
+          // Input Decoration
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: const Color(0xFFF1F5F9), // Slate 100
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFF0F172A), width: 1.5),
+            ),
+          ),
+
+          // Elevated Button
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F172A),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
         home: const AppInitializer(),
         routes: {
           '/registration': (context) => const RegistrationScreen(),
-          '/home': (context) => const HomeScreen(),
+          '/home': (context) => const MainScaffold(),
           '/add-invoice': (context) => const InvoiceFormScreen(),
           '/report': (context) => const ReportScreen(),
           '/clients': (context) => const ClientsScreen(),
+          '/tools': (context) => const ToolsScreen(),
+          '/tools/cashea-calculator': (context) => const CasheaCalculatorScreen(),
+          '/tools/currency-converter': (context) => const CurrencyConverterScreen(),
+          '/tools/discount-calculator': (context) => const DiscountCalculatorScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/edit-invoice') {
@@ -136,7 +211,7 @@ class _AppInitializerState extends State<AppInitializer> {
           return const RegistrationScreen();
         }
 
-        return const HomeScreen();
+        return const MainScaffold();
       },
     );
   }

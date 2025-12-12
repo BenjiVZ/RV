@@ -194,6 +194,17 @@ class DatabaseService {
     return maps.map((map) => DailyReport.fromMap(map)).toList();
   }
 
+  // Get ALL closed reports for history, ordered by date descending
+  Future<List<DailyReport>> getAllClosedReports() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'daily_reports',
+      where: 'isOpen = 0',
+      orderBy: 'date DESC, sessionNumber DESC',
+    );
+    return maps.map((map) => DailyReport.fromMap(map)).toList();
+  }
+
   // Invoice methods
   Future<int> createInvoice(Invoice invoice) async {
     final db = await database;
@@ -265,5 +276,60 @@ class DatabaseService {
   Future<void> deleteClient(int id) async {
     final db = await database;
     await db.delete('clients', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Backup & Restore
+  Future<Map<String, dynamic>> getAllData() async {
+    final db = await database;
+    
+    final users = await db.query('users');
+    final reports = await db.query('daily_reports');
+    final invoices = await db.query('invoices');
+    final clients = await db.query('clients');
+    
+    return {
+      'users': users,
+      'daily_reports': reports,
+      'invoices': invoices,
+      'clients': clients,
+      'version': 1,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+  }
+
+  Future<void> restoreData(Map<String, dynamic> data) async {
+    final db = await database;
+    
+    await db.transaction((txn) async {
+      // Clear existing data
+      await txn.delete('users');
+      await txn.delete('daily_reports');
+      await txn.delete('invoices');
+      await txn.delete('clients');
+      
+      // Restore users
+      final users = data['users'] as List;
+      for (var item in users) {
+        await txn.insert('users', item as Map<String, dynamic>);
+      }
+      
+      // Restore reports
+      final reports = data['daily_reports'] as List;
+      for (var item in reports) {
+        await txn.insert('daily_reports', item as Map<String, dynamic>);
+      }
+      
+      // Restore invoices
+      final invoices = data['invoices'] as List;
+      for (var item in invoices) {
+        await txn.insert('invoices', item as Map<String, dynamic>);
+      }
+      
+      // Restore clients
+      final clients = data['clients'] as List;
+      for (var item in clients) {
+        await txn.insert('clients', item as Map<String, dynamic>);
+      }
+    });
   }
 }

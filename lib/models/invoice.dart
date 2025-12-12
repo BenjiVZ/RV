@@ -1,4 +1,4 @@
-enum PaymentType { contado, cashea }
+enum PaymentType { contado, cashea, ivoo }
 
 class Invoice {
   final int? id;

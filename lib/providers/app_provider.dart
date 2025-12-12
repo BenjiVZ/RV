@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/invoice.dart';
@@ -15,6 +16,7 @@ class AppProvider extends ChangeNotifier {
   List<Invoice> _currentInvoices = [];
   DailyReport? _currentReport;
   List<DailyReport> _closedReports = [];
+  List<DailyReport> _history = [];
   List<Client> _clients = [];
   bool _isLoading = true;
   bool _isActivated = false;
@@ -23,6 +25,7 @@ class AppProvider extends ChangeNotifier {
   List<Invoice> get currentInvoices => _currentInvoices;
   DailyReport? get currentReport => _currentReport;
   List<DailyReport> get closedReports => _closedReports;
+  List<DailyReport> get history => _history;
   List<Client> get clients => _clients;
   bool get isLoading => _isLoading;
   bool get isActivated => _isActivated;
@@ -75,6 +78,29 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadHistory() async {
+    _history = await _db.getAllClosedReports();
+    notifyListeners();
+  }
+
+  // Backup & Restore
+  Future<String> exportData() async {
+    final data = await _db.getAllData();
+    return jsonEncode(data);
+  }
+
+  Future<bool> importData(String jsonString) async {
+    try {
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+      await _db.restoreData(data);
+      await initialize(); // Reload app state
+      return true;
+    } catch (e) {
+      debugPrint('Error importing data: $e');
+      return false;
+    }
+  }
+
   Future<void> createUser(String name) async {
     final user = User(name: name);
     await _db.createUser(user);
@@ -97,7 +123,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   // Grand total for current session
-  double get grandTotal => totalCashea + totalContado;
+  double get grandTotal => totalCashea + totalContado + totalIvoo;
 
   Future<void> openReport() async {
     final reportId = await _db.openDailyReport(today);
@@ -168,6 +194,19 @@ class AppProvider extends ChangeNotifier {
       .where((i) => i.paymentType == PaymentType.contado)
       .fold(0, (sum, i) => sum + i.productCount);
 
+  // IVOO
+  double get totalIvoo => _currentInvoices
+      .where((i) => i.paymentType == PaymentType.ivoo)
+      .fold(0.0, (sum, i) => sum + i.totalAmount);
+
+  int get invoiceCountIvoo => _currentInvoices
+      .where((i) => i.paymentType == PaymentType.ivoo)
+      .length;
+
+  int get productCountIvoo => _currentInvoices
+      .where((i) => i.paymentType == PaymentType.ivoo)
+      .fold(0, (sum, i) => sum + i.productCount);
+
   // Calculate totals for a list of invoices (for closed reports)
   static Map<String, dynamic> calculateTotals(List<Invoice> invoices) {
     return {
@@ -188,6 +227,15 @@ class AppProvider extends ChangeNotifier {
           .length,
       'productCountContado': invoices
           .where((i) => i.paymentType == PaymentType.contado)
+          .fold(0, (sum, i) => sum + i.productCount),
+      'totalIvoo': invoices
+          .where((i) => i.paymentType == PaymentType.ivoo)
+          .fold(0.0, (sum, i) => sum + i.totalAmount),
+      'invoiceCountIvoo': invoices
+          .where((i) => i.paymentType == PaymentType.ivoo)
+          .length,
+      'productCountIvoo': invoices
+          .where((i) => i.paymentType == PaymentType.ivoo)
           .fold(0, (sum, i) => sum + i.productCount),
     };
   }

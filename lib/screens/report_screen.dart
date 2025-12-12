@@ -71,8 +71,11 @@ class _ReportScreenState extends State<ReportScreen> {
 • Venta contado: \$${(totals['totalContado'] as double).toStringAsFixed(2)}
 • Facturas contado: ${totals['invoiceCountContado']}
 • Productos contado: ${totals['productCountContado']}
+• Venta IVOO App: \$${(totals['totalIvoo'] as double).toStringAsFixed(2)}
+• Facturas IVOO App: ${totals['invoiceCountIvoo']}
+• Productos IVOO App: ${totals['productCountIvoo']}
 
-TOTAL DEL DÍA: \$${((totals['totalCashea'] as double) + (totals['totalContado'] as double)).toStringAsFixed(2)}''';
+TOTAL DEL DÍA: \$${((totals['totalCashea'] as double) + (totals['totalContado'] as double) + (totals['totalIvoo'] as double)).toStringAsFixed(2)}''';
   }
 
   void _copyReport(AppProvider provider) {
@@ -333,6 +336,36 @@ TOTAL DEL DÍA: \$${((totals['totalCashea'] as double) + (totals['totalContado']
                               color: Colors.green,
                             ),
 
+                            const SizedBox(height: 16),
+                            Divider(color: Colors.grey.shade200, thickness: 2),
+                            const SizedBox(height: 16),
+
+                            // IVOO Section
+                            _SectionHeader(
+                              title: 'IVOO App',
+                              icon: Icons.smartphone,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(height: 12),
+                            _ReportItem(
+                              icon: Icons.attach_money,
+                              label: 'Venta IVOO App',
+                              value: '\$${(totals['totalIvoo'] as double).toStringAsFixed(2)}',
+                              color: Colors.orange,
+                            ),
+                            _ReportItem(
+                              icon: Icons.receipt_long,
+                              label: 'Facturas IVOO App',
+                              value: '${totals['invoiceCountIvoo']}',
+                              color: Colors.orange,
+                            ),
+                            _ReportItem(
+                              icon: Icons.shopping_cart,
+                              label: 'Productos IVOO App',
+                              value: '${totals['productCountIvoo']}',
+                              color: Colors.orange,
+                            ),
+
                             const SizedBox(height: 24),
                             Divider(color: Colors.grey.shade200, thickness: 2),
                             const SizedBox(height: 16),
@@ -370,7 +403,7 @@ TOTAL DEL DÍA: \$${((totals['totalCashea'] as double) + (totals['totalContado']
                                     ],
                                   ),
                                   Text(
-                                    '\$${((totals['totalCashea'] as double) + (totals['totalContado'] as double)).toStringAsFixed(2)}',
+                                    '\$${((totals['totalCashea'] as double) + (totals['totalContado'] as double) + (totals['totalIvoo'] as double)).toStringAsFixed(2)}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,

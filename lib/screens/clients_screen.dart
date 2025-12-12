@@ -37,15 +37,26 @@ class _ClientsScreenState extends State<ClientsScreen> {
   }
 
   Future<void> _openWhatsApp(String phone) async {
-    final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    final url = Uri.parse('https://wa.me/$cleanPhone');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    final cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
+    
+    // Try native scheme first (more reliable if app is installed)
+    final nativeUrl = Uri.parse('whatsapp://send?phone=$cleanPhone');
+    // Fallback to web link
+    final webUrl = Uri.parse('https://wa.me/$cleanPhone');
+    
+    try {
+      if (await canLaunchUrl(nativeUrl)) {
+        await launchUrl(nativeUrl);
+      } else if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch WhatsApp';
+      }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('No se pudo abrir WhatsApp'),
+            content: const Text('No se pudo abrir WhatsApp. Verifica que esté instalado.'),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
           ),
@@ -250,14 +261,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 padding: EdgeInsets.all(horizontalPadding),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
